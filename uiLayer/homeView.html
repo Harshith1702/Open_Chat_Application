@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>RTRP Real-Time Chat</title>
-  <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-/>
 
-  <link rel="stylesheet" href="design.css" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <link rel="stylesheet" href="/design.css" />
 </head>
 
 <body>
@@ -67,84 +68,11 @@
 
 </div>
 
+<!-- Socket.IO -->
 <script src="/socket.io/socket.io.js"></script>
-<script src="realtime.js"></script>
+
+<!-- Client JS -->
+<script src="/realtime.js"></script>
 
 </body>
 </html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>RTRP Real-Time Chat</title>
-  <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-/>
-
-  <link rel="stylesheet" href="design.css" />
-</head>
-
-<body>
-
-<div class="shell">
-
-  <!-- SIDEBAR (PC ONLY) -->
-  <aside class="sidebar">
-    <div class="logo">RTRP</div>
-    <button class="side-btn">💬</button>
-    <button class="side-btn">⭐</button>
-    <button class="side-btn">🕘</button>
-    <button class="side-btn">⚙️</button>
-  </aside>
-
-  <!-- MAIN APP -->
-  <main class="app">
-
-    <!-- HEADER -->
-    <header class="chat-header">
-      <div class="header-text">
-        <div class="title">RTRP Real-Time Chat</div>
-        <div class="subtitle">Live • Secure • Multi-User</div>
-      </div>
-
-      <div class="header-actions">
-        <button id="infoBtn">ℹ️</button>
-        <button id="clearChat">🧹</button>
-      </div>
-    </header>
-
-    <!-- CHAT -->
-    <section id="chat-box" class="chat"></section>
-
-    <!-- INPUT -->
-    <footer class="input-bar">
-      <button id="emojiBtn">😀</button>
-      <button id="attachBtn">📎</button>
-      <button id="micBtn">🎤</button>
-
-      <input id="message-input" placeholder="Type a message…" />
-
-      <button id="send-btn">➤</button>
-    </footer>
-
-  </main>
-
-  <!-- INFO PANEL -->
-  <aside class="info-panel" id="infoPanel">
-    <button id="closeInfo" class="close-info">✕</button>
-    <h3>Chat Info</h3>
-    <p>Real-time Socket.IO chat</p>
-    <p>Multiple users supported</p>
-    <p>Demo UI interactions enabled</p>
-  </aside>
-
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script src="realtime.js"></script>
-
-</body>
-</html>
-
