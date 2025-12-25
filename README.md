@@ -64,7 +64,8 @@ Open_Chat_Application/
 ### Desktop View
 ![Desktop Chat UI](screenshots/desktop-chat.png)
 
-
+### Mobile View
+![Mobile Chat UI](screenshots/mobile-view.jpeg)
 
 ### WebSocket Connection Proof
 ![WebSocket 101 Status](screenshots/websocket-101.png)
