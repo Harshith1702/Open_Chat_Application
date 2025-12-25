@@ -69,7 +69,7 @@ Open_Chat_Application/
 ---
 
 ## 👤 Author
-**Harshith**  
+**Padakanti Harshith**  
 B.Tech CSE – 2nd Year  
 
 ---
