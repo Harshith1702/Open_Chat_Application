@@ -56,7 +56,7 @@ A feature-rich, real-time chat application with room-based architecture, built u
 ```
 Open_Chat_Application/
 │
-├── uiLayer/                    # Frontend files
+├── uiLayer/                   # Frontend files
 │   ├── homeView.html          # Main chat interface
 │   ├── design.css             # Styling and animations
 │   └── realtime.js            # Client-side Socket.IO logic
@@ -80,21 +80,21 @@ Open_Chat_Application/
 ## 🧠 System Architecture
 ```
 ┌─────────────┐          HTTP/WebSocket          ┌─────────────┐
-│   Browser   │ ◄──────────────────────────────► │  Node.js    │
-│  (Client)   │                                   │   Server    │
-└─────────────┘                                   └─────────────┘
-      │                                                   │
+│   Browser   │ ◄──────────────────────────────► │   Node.js   │
+│  (Client)   │                                  │    Server   │
+└─────────────┘                                  └─────────────┘
+      │                                                 │
       │  1. HTTP GET (homeView.html)                    │
-      │─────────────────────────────────────────────────►│
-      │                                                   │
+      │────────────────────────────────────────────────►│
+      │                                                 │
       │  2. Establish WebSocket Connection              │
-      │◄ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ►│
-      │                                                   │
+      │◄ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ►│
+      │                                                 │
       │  3. Create/Join Room                            │
-      │─────────────────────────────────────────────────►│
-      │                                                   │
+      │────────────────────────────────────────────────►│
+      │                                                 │
       │  4. Real-time Messages & Updates                │
-      │◄─────────────────────────────────────────────────│
+      │◄────────────────────────────────────────────────│
 ```
 
 **Key Components:**
@@ -154,32 +154,30 @@ Open_Chat_Application/
 ![Desktop Chat Interface](screenshots/desktop-view.png)
 
 *Spacious layout with room list sidebar and chat area*
-
-
+<br>
 ### 📱 Mobile View
-![Mobile Responsive Design](<img src="screenshots/mobile-view.png" width="300">)
+
+<p align="center">
+  <img src="screenshots/mobile-view.png" width="300">
+</p>
 
 *Optimized for touch interactions and smaller screens*
-
-
+<br>
 ### 🏠 Create Room Interface
 ![Create Room Modal](screenshots/create-room.png)
 
 *Intuitive room creation with all options visible*
-
-
+<br>
 ### 💬 Active Chat Room
 ![Chat Room in Action](screenshots/chat-room.png)
 
 *Real-time messaging with typing indicators and user list*
-
-
+<br>
 ### 🔌 WebSocket Connection
 ![WebSocket 101 Protocol](screenshots/websocket-101.png)
 
 *Developer tools showing active WebSocket connection*
-
-
+<br>
 ### ☁️ Cloud Deployment
 ![Render Deployment Dashboard](screenshots/render-deploy.png)
 
