@@ -308,6 +308,15 @@ leaveRoomBtn.addEventListener("click", () => {
     updateRoomInfo(room);
   });
 
+  // Room updated (user count changed)
+  socket.on("room-updated", (room) => {
+  if (currentRoom && currentRoom.id === room.id) {
+    currentRoom = room;
+    updateRoomSubtitle(room);
+    updateRoomInfo(room);
+  }
+  });
+
   // Room message with timestamps
   socket.on("room-message", (msg) => {
     const div = document.createElement("div");

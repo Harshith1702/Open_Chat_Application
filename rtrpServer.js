@@ -101,19 +101,21 @@ socket.on("create-room", ({ roomName, password, isPrivate, maxUsers, owner }) =>
     room.users.push({ id: socket.id, username });
     rooms.set(roomId, room);
 
-    // Notify user
-    socket.emit("joined-room", room);
-    
-    // Notify room with timestamp
-    io.to(roomId).emit("room-message", {
-      type: "system",
-      text: `${username} joined the room`,
-      timestamp: new Date()
-    });
+// Notify user
+socket.emit("joined-room", room);
 
-    // Update rooms list for everyone
-    io.emit("rooms-list", Array.from(rooms.values()));
-  });
+// Notify room with timestamp
+io.to(roomId).emit("room-message", {
+  type: "system",
+  text: `${username} joined the room`,
+  timestamp: new Date()
+});
+
+// Update room info for all users in the room
+io.to(roomId).emit("room-updated", room);
+
+// Update rooms list for everyone
+io.emit("rooms-list", Array.from(rooms.values()));
 
   // Leave room
   socket.on("leave-room", () => {
@@ -181,17 +183,19 @@ function leaveRoom(socket) {
   });
 
   // Delete room if empty
-  if (room.users.length === 0) {
-    rooms.delete(socket.currentRoom);
-  } else {
-    rooms.set(socket.currentRoom, room);
-  }
+if (room.users.length === 0) {
+  rooms.delete(socket.currentRoom);
+} else {
+  rooms.set(socket.currentRoom, room);
+  // Update room info for remaining users
+  io.to(socket.currentRoom).emit("room-updated", room);
+}
 
-  socket.leave(socket.currentRoom);
-  socket.currentRoom = null;
+socket.leave(socket.currentRoom);
+socket.currentRoom = null;
 
-  // Update rooms list
-  io.emit("rooms-list", Array.from(rooms.values()));
+// Update rooms list
+io.emit("rooms-list", Array.from(rooms.values()));
 }
 
 /* ================= SERVER START ================= */
