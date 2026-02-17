@@ -40,7 +40,7 @@ A feature-rich, real-time chat application with room-based architecture, built u
 - Owner name displayed in room listings
 - Set maximum user limits per room (2-100 users)
 - Visual occupancy indicators (e.g., `3 / 10`)
-- System-wide limit of 101 rooms to prevent overload
+- System-wide limit of 101 users per room to prevent overload
 
 ### User Experience
 - Unique usernames required within each room
