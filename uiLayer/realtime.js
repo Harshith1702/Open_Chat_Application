@@ -271,9 +271,9 @@ leaveRoomBtn.addEventListener("click", () => {
 
   function leaveRoom() {
   socket.emit("leave-room");
-  setTimeout(() => {
+ /* setTimeout(() => {
     location.reload();
-  }, 300);
+  }, 300); */
 }
 
   // Info panel
