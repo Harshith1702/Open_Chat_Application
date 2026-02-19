@@ -270,10 +270,14 @@ leaveRoomBtn.addEventListener("click", () => {
 });
 
   function leaveRoom() {
-  socket.emit("leave-room");
-  setTimeout(() => {
-    location.reload();
-  }, 300);
+   socket.emit("leave-room");
+   const isOwner = currentRoom && currentRoom.owner === currentUsername;
+   if (isOwner) {
+     lobbyView.style.display = "block";
+     chatView.style.display = "none";
+     currentRoom = null;
+     chat.innerHTML = "";
+   }
 }
 
   // Info panel
