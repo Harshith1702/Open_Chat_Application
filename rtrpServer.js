@@ -1,416 +1,206 @@
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Realtime JS loaded");
+let onlineUsers = 0; // users
 
-  const socket = io();
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
 
-  // Views
-  const lobbyView = document.getElementById("lobby-view");
-  const chatView = document.getElementById("chat-view");
+const app = express();
+const server = http.createServer(app);
 
-  // Lobby elements
-  const roomsList = document.getElementById("roomsList");
-  const createRoomBtn = document.getElementById("createRoomBtn");
-  const searchRooms = document.getElementById("searchRooms");
+// Room management
+const rooms = new Map(); // Store all rooms
+const MAX_ROOMS = 101;
 
-  // Modals
-  const createRoomModal = document.getElementById("createRoomModal");
-  const joinRoomModal = document.getElementById("joinRoomModal");
-  const closeCreateModal = document.getElementById("closeCreateModal");
-  const closeJoinModal = document.getElementById("closeJoinModal");
-
-  // Create room form
-  const newRoomName = document.getElementById("newRoomName");
-  const maxUsers = document.getElementById("maxUsers");
-  const isPrivate = document.getElementById("isPrivate");
-  const passwordGroup = document.getElementById("passwordGroup");
-  const roomPassword = document.getElementById("roomPassword");
-  const confirmCreateRoom = document.getElementById("confirmCreateRoom");
-
-  // Join room form
-  const joinUsername = document.getElementById("joinUsername");
-  const joinPassword = document.getElementById("joinPassword");
-  const joinPasswordGroup = document.getElementById("joinPasswordGroup");
-  const confirmJoinRoom = document.getElementById("confirmJoinRoom");
-
-  // Chat elements
-  const chat = document.getElementById("chat-box");
-  const input = document.getElementById("message-input");
-  const sendBtn = document.getElementById("send-btn");
-  const roomTitle = document.getElementById("roomTitle");
-  const roomSubtitle = document.getElementById("roomSubtitle");
-  const leaveRoomBtn = document.getElementById("leaveRoomBtn");
-  const clearChatBtn = document.getElementById("clearChatBtn");
-  const typingIndicator = document.getElementById("typingIndicator");
-  const emojiBtn = document.getElementById("emojiBtn");
-  const infoBtn = document.getElementById("infoBtn");
-  const infoPanel = document.getElementById("infoPanel");
-  const closeInfo = document.getElementById("closeInfo");
-  const roomInfo = document.getElementById("roomInfo");
-
-  // State
-  let currentRoom = null;
-  let currentUsername = "";
-  let selectedRoomForJoin = null;
-  let allRooms = [];
-  let typingTimeout = null;
-
-  // ===== LOBBY FUNCTIONS =====
-
-  // Display rooms
-  function displayRooms(rooms) {
-    allRooms = rooms;
-    const filtered = searchRooms.value 
-      ? rooms.filter(r => r.name.toLowerCase().includes(searchRooms.value.toLowerCase()))
-      : rooms;
-
-    if (filtered.length === 0) {
-      roomsList.innerHTML = '<p style="text-align:center;color:#666;padding:40px;">No rooms available. Create one!</p>';
-      return;
-    }
-
-    roomsList.innerHTML = filtered.map(room => {
-      const isFull = room.users.length >= room.maxUsers;
-      return `
-        <div class="room-card ${isFull ? 'room-full' : ''}" data-room-id="${room.id}" ${!isFull ? 'onclick="handleRoomClick(\'' + room.id + '\')"' : ''}>
-          <div class="room-card-header">
-            <div>
-              <div class="room-name">${escapeHtml(room.name)}</div>
-              <div class="room-owner">Owner: ${escapeHtml(room.owner)}</div>
-            </div>
-            <div class="room-privacy">${room.isPrivate ? '🔒' : '🔓'}</div>
-          </div>
-          <div class="room-stats">
-            <div class="room-stat">👥 ${room.users.length} / ${room.maxUsers}</div>
-            <div class="room-stat">${room.isPrivate ? 'Private' : 'Public'}</div>
-            ${isFull ? '<div class="room-stat" style="color:#f44336;">FULL</div>' : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+/* ================= SOCKET.IO SETUP ================= */
+/* (CORS added for ngrok / multi-network access) */
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
   }
+});
 
-  // Handle room click
-  window.handleRoomClick = function(roomId) {
-    const room = allRooms.find(r => r.id === roomId);
-    if (!room) return;
+/* ================= FRONTEND FILES ================= */
+// Serve frontend files
+app.use(express.static(path.join(__dirname, "uiLayer")));
 
-    selectedRoomForJoin = room;
-    
-    // Show password field if private
-    if (room.isPrivate) {
-      joinPasswordGroup.style.display = 'block';
-    } else {
-      joinPasswordGroup.style.display = 'none';
-    }
+// Serve main UI page
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "uiLayer", "homeView.html"));
+});
 
-    joinRoomModal.classList.add('active');
-    joinUsername.focus();
-  };
+/* ================= SOCKET LOGIC ================= */
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-  // Create room modal
-  createRoomBtn.addEventListener("click", () => {
-    createRoomModal.classList.add('active');
-    newRoomName.focus();
-  });
-
-  closeCreateModal.addEventListener("click", () => {
-    createRoomModal.classList.remove('active');
-    resetCreateForm();
-  });
-
-  closeJoinModal.addEventListener("click", () => {
-    joinRoomModal.classList.remove('active');
-    resetJoinForm();
-  });
-
-  // Toggle password field
-  isPrivate.addEventListener("change", () => {
-    passwordGroup.style.display = isPrivate.checked ? 'block' : 'none';
-  });
+  // Send current rooms list
+  socket.emit("rooms-list", Array.from(rooms.values()));
 
   // Create room
-  confirmCreateRoom.addEventListener("click", () => {
-    const name = newRoomName.value.trim();
-    const max = parseInt(maxUsers.value);
-    const owner = prompt("Enter your username to create this room:");
-
-    if (!owner || !owner.trim()) {
-      alert("Username is required!");
+  socket.on("create-room", ({ roomName, password, isPrivate, maxUsers, owner }) => {
+    if (rooms.size >= MAX_ROOMS) {
+      socket.emit("error", "Maximum 101 rooms reached");
       return;
     }
 
-    if (!name || name.length < 2) {
-      alert("Room name must be at least 2 characters!");
+    if (rooms.has(roomName.toLowerCase())) {
+      socket.emit("error", "Room name already exists");
       return;
     }
 
-    if (max < 2 || max > 100) {
-      alert("Max users must be between 2 and 100!");
-      return;
-    }
-
-    const password = isPrivate.checked ? roomPassword.value : "";
-
-    if (isPrivate.checked && !password) {
-      alert("Password required for private rooms!");
-      return;
-    }
-
-    // Store data for auto-join
-    const roomData = {
-      roomName: name,
-      password,
-      isPrivate: isPrivate.checked,
-      maxUsers: max,
-      owner: owner.trim()
+    const room = {
+      id: roomName.toLowerCase(),
+      name: roomName,
+      owner,
+      password: password || "",
+      isPrivate,
+      maxUsers,
+      users: [],
+      typingUsers: []
     };
 
-    currentUsername = owner.trim();
-
-    socket.emit("create-room", roomData);
-
-    createRoomModal.classList.remove('active');
-    resetCreateForm();
-
-    // Set flag to auto-join after room is created
-    socket.once("room-created", (createdRoom) => {
-      socket.emit("join-room", {
-        roomId: createdRoom.id,
-        username: currentUsername,
-        password: password
-      });
-    });
+    rooms.set(room.id, room);
+    
+    // Notify creator that room is ready
+    socket.emit("room-created", room);
+    
+    // Update rooms list for everyone
+    io.emit("rooms-list", Array.from(rooms.values()));
   });
 
   // Join room
-  confirmJoinRoom.addEventListener("click", () => {
-    const username = joinUsername.value.trim();
-    const password = joinPassword.value;
-
-    if (!username || username.length < 2) {
-      alert("Username must be at least 2 characters!");
+  socket.on("join-room", ({ roomId, username, password }) => {
+    const room = rooms.get(roomId);
+    
+    if (!room) {
+      socket.emit("error", "Room not found");
       return;
     }
 
-    if (!selectedRoomForJoin) return;
+    if (room.users.some(u => u.username === username)) {
+      socket.emit("error", "Username already in this room");
+      return;
+    }
 
-    currentUsername = username;
+    if (room.users.length >= room.maxUsers) {
+      socket.emit("error", "Room is full");
+      return;
+    }
 
-    socket.emit("join-room", {
-      roomId: selectedRoomForJoin.id,
-      username,
-      password
+    if (room.isPrivate && room.password !== password) {
+      socket.emit("error", "Incorrect password");
+      return;
+    }
+
+    // Add user to room
+    socket.join(roomId);
+    socket.currentRoom = roomId;
+    socket.username = username;
+
+    room.users.push({ id: socket.id, username });
+    rooms.set(roomId, room);
+
+    // Notify user
+    socket.emit("joined-room", room);
+
+    // Notify room with timestamp
+    io.to(roomId).emit("room-message", {
+      type: "system",
+      text: `${username} joined the room`,
+      timestamp: new Date()
     });
 
-    joinRoomModal.classList.remove('active');
-    resetJoinForm();
+    // Update room info for all users in the room
+    io.to(roomId).emit("room-updated", room);
+
+    // Update rooms list for everyone
+    io.emit("rooms-list", Array.from(rooms.values()));
   });
 
-  // Search rooms
-  searchRooms.addEventListener("input", () => {
-    displayRooms(allRooms);
+  // Leave room
+  socket.on("leave-room", () => {
+    leaveRoom(socket);
   });
-
-  // ===== CHAT FUNCTIONS =====
 
   // Send message
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+  socket.on("chat-message", (msg) => {
+    if (!socket.currentRoom) return;
 
-    socket.emit("chat-message", text);
-    input.value = "";
-  }
+    io.to(socket.currentRoom).emit("room-message", {
+      type: "user",
+      username: socket.username,
+      text: msg,
+      timestamp: new Date()
+    });
 
-  sendBtn.addEventListener("click", sendMessage);
-  
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      sendMessage();
+    // Clear typing indicator
+    const room = rooms.get(socket.currentRoom);
+    if (room) {
+      room.typingUsers = room.typingUsers.filter(u => u !== socket.username);
+      io.to(socket.currentRoom).emit("typing-users", room.typingUsers);
     }
   });
 
   // Typing indicator
-  input.addEventListener("input", () => {
-    socket.emit("typing", true);
+  socket.on("typing", (isTyping) => {
+    if (!socket.currentRoom) return;
 
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      socket.emit("typing", false);
-    }, 1000);
-  });
+    const room = rooms.get(socket.currentRoom);
+    if (!room) return;
 
-  // Emoji
-  if (emojiBtn) {
-    emojiBtn.addEventListener("click", () => {
-      input.value += "😀";
-      input.focus();
-    });
-  }
-
-  // Clear chat
-  if (clearChatBtn) {
-    clearChatBtn.addEventListener("click", () => {
-      if (confirm("Clear all messages in this chat?")) {
-        chat.innerHTML = "";
-      }
-    });
-  }
-
-  // Leave room with confirmation
-  leaveRoomBtn.addEventListener("click", () => {
-    const isOwner = currentRoom && currentRoom.owner === currentUsername;
-    const message = isOwner 
-      ? "Do you want to exit and delete this room?" 
-      : "Do you want to leave this room?";
-    
-    if (confirm(message)) {
-      leaveRoom();
-    }
-  });
-
-  function leaveRoom() {
-    socket.emit("leave-room");
-    
-    // Wait for server confirmation before reload
-    socket.once("left-room-confirmed", () => {
-      location.reload();
-    });
-    
-    // Fallback: reload after 1 second if no response
-    setTimeout(() => {
-      location.reload();
-    }, 1000);
-  }
-
-  // Info panel
-  if (infoBtn) {
-    infoBtn.addEventListener("click", () => {
-      infoPanel.classList.add("open");
-    });
-  }
-
-  if (closeInfo) {
-    closeInfo.addEventListener("click", () => {
-      infoPanel.classList.remove("open");
-    });
-  }
-
-  // ===== SOCKET EVENTS =====
-
-  // Rooms list
-  socket.on("rooms-list", (rooms) => {
-    displayRooms(rooms);
-  });
-
-  // Joined room
-  socket.on("joined-room", (room) => {
-    currentRoom = room;
-    lobbyView.style.display = "none";
-    chatView.style.display = "flex";
-
-    roomTitle.textContent = room.name;
-    updateRoomSubtitle(room);
-    updateRoomInfo(room);
-  });
-
-  // Room updated (user count changed)
-  socket.on("room-updated", (room) => {
-    if (currentRoom && currentRoom.id === room.id) {
-      currentRoom = room;
-      updateRoomSubtitle(room);
-      updateRoomInfo(room);
-    }
-  });
-
-  // Room message with timestamps
-  socket.on("room-message", (msg) => {
-    const div = document.createElement("div");
-
-    if (msg.type === "system") {
-      div.className = "system";
-      const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-      div.textContent = `${msg.text} • ${time}`;
-    } else {
-      const isMine = msg.username === currentUsername;
-      div.className = "message " + (isMine ? "my" : "other");
-
-      const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-
-      div.innerHTML = `
-        <div style="font-size:12px;opacity:0.7;margin-bottom:4px;">
-          ${isMine ? "You" : escapeHtml(msg.username)}
-          <span style="margin-left:8px;font-size:10px;opacity:0.6;">${time}</span>
-        </div>
-        <div>${escapeHtml(msg.text)}</div>
-      `;
+    if (isTyping && !room.typingUsers.includes(socket.username)) {
+      room.typingUsers.push(socket.username);
+    } else if (!isTyping) {
+      room.typingUsers = room.typingUsers.filter(u => u !== socket.username);
     }
 
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+    io.to(socket.currentRoom).emit("typing-users", room.typingUsers);
   });
 
-  // Typing users
-  socket.on("typing-users", (users) => {
-    const others = users.filter(u => u !== currentUsername);
-    
-    if (others.length === 0) {
-      typingIndicator.textContent = "";
-    } else if (others.length === 1) {
-      typingIndicator.textContent = `${others[0]} is typing...`;
-    } else {
-      typingIndicator.textContent = `${others.length} people are typing...`;
-    }
+  // Disconnect
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+    leaveRoom(socket);
+  });
+});
+
+// Helper function to leave room
+function leaveRoom(socket) {
+  if (!socket.currentRoom) return;
+
+  const room = rooms.get(socket.currentRoom);
+  if (!room) return;
+
+  // Remove user
+  room.users = room.users.filter(u => u.id !== socket.id);
+  room.typingUsers = room.typingUsers.filter(u => u !== socket.username);
+
+  // Notify room with timestamp
+  io.to(socket.currentRoom).emit("room-message", {
+    type: "system",
+    text: `${socket.username} left the room`,
+    timestamp: new Date()
   });
 
-  // Error
-  socket.on("error", (msg) => {
-    alert(msg);
-  });
-
-  // ===== HELPER FUNCTIONS =====
-
-  function updateRoomSubtitle(room) {
-    roomSubtitle.textContent = `👥 ${room.users.length} / ${room.maxUsers} users`;
+  // Delete room if empty
+  if (room.users.length === 0) {
+    rooms.delete(socket.currentRoom);
+  } else {
+    rooms.set(socket.currentRoom, room);
+    // Update room info for remaining users
+    io.to(socket.currentRoom).emit("room-updated", room);
   }
 
-  function updateRoomInfo(room) {
-    roomInfo.innerHTML = `
-      <p><strong>Room:</strong> ${escapeHtml(room.name)}</p>
-      <p><strong>Owner:</strong> 👑 ${escapeHtml(room.owner)}</p>
-      <p><strong>Users:</strong> ${room.users.length} / ${room.maxUsers}</p>
-      <p><strong>Type:</strong> ${room.isPrivate ? '🔒 Private' : '🔓 Public'}</p>
-      <hr style="margin:16px 0;border-color:#333;">
-      <p style="font-size:12px;color:#999;">Real-time Socket.IO chat</p>
-    `;
-  }
+  socket.leave(socket.currentRoom);
+  socket.currentRoom = null;
 
-  function resetCreateForm() {
-    newRoomName.value = "";
-    maxUsers.value = "10";
-    isPrivate.checked = false;
-    roomPassword.value = "";
-    passwordGroup.style.display = "none";
-  }
+  // Update rooms list
+  io.emit("rooms-list", Array.from(rooms.values()));
+}
 
-  function resetJoinForm() {
-    joinUsername.value = "";
-    joinPassword.value = "";
-    joinPasswordGroup.style.display = "none";
-    selectedRoomForJoin = null;
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  console.log("Realtime chat initialized");
+/* ================= SERVER START ================= */
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`RTRP Server running on port ${PORT}`);
 });
