@@ -298,7 +298,7 @@ Found a bug? Have suggestions?
 
 <div align="center">
 
-**Built with ❤️ by Harshith**
+**Built with 🖤 by Harshith**
 
 [![GitHub Stars](https://img.shields.io/github/stars/Harshith1702/Open_Chat_Application?style=social)](https://github.com/Harshith1702/Open_Chat_Application)
 [![GitHub Forks](https://img.shields.io/github/forks/Harshith1702/Open_Chat_Application?style=social)](https://github.com/Harshith1702/Open_Chat_Application/fork)
