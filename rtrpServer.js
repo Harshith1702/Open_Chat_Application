@@ -120,6 +120,7 @@ io.on("connection", (socket) => {
 
   // Leave room
   socket.on("leave-room", () => {
+    console.log("🔔 LEAVE-ROOM EVENT RECEIVED for socket:", socket.id);
     leaveRoom(socket);
   });
 
@@ -167,20 +168,42 @@ io.on("connection", (socket) => {
 
 // Helper function to leave room
 function leaveRoom(socket) {
-  if (!socket.currentRoom) return;
+  console.log("\n=== LEAVE ROOM START ===");
+  console.log("Socket ID:", socket.id);
+  console.log("Username:", socket.username);
+  console.log("Current Room:", socket.currentRoom);
+  
+  if (!socket.currentRoom) {
+    console.log("❌ No current room - EXITING");
+    console.log("=== LEAVE ROOM END ===\n");
+    return;
+  }
 
   const room = rooms.get(socket.currentRoom);
-  if (!room) return;
+  if (!room) {
+    console.log("❌ Room not found in map - EXITING");
+    console.log("=== LEAVE ROOM END ===\n");
+    return;
+  }
+
+  console.log("✅ Room found:", room.name);
+  console.log("Users BEFORE leave:", room.users.map(u => u.username));
+  console.log("User count BEFORE:", room.users.length);
 
   const roomName = socket.currentRoom;
   const username = socket.username;
 
   socket.leave(roomName);
+  console.log("✅ Socket left Socket.IO room");
 
   room.users = room.users.filter(u => u.id !== socket.id);
   room.typingUsers = room.typingUsers.filter(u => u !== username);
 
+  console.log("Users AFTER leave:", room.users.map(u => u.username));
+  console.log("User count AFTER:", room.users.length);
+
   if (room.users.length > 0) {
+    console.log("✅ Room still has users - KEEPING room");
     io.to(roomName).emit("room-message", {
       type: "system",
       text: `${username} left the room`,
@@ -191,12 +214,20 @@ function leaveRoom(socket) {
   }
 
   if (room.users.length === 0) {
+    console.log("🗑️ DELETING ROOM:", roomName);
     rooms.delete(roomName);
+    console.log("✅ Room deleted successfully");
+    console.log("Total rooms remaining:", rooms.size);
+    console.log("Remaining room IDs:", Array.from(rooms.keys()));
   }
 
   socket.currentRoom = null;
+  console.log("✅ Socket.currentRoom set to null");
 
+  console.log("📢 Broadcasting rooms-list to ALL clients");
   io.emit("rooms-list", Array.from(rooms.values()));
+  console.log("✅ Rooms-list broadcasted");
+  console.log("=== LEAVE ROOM END ===\n");
 }
 
 /* ================= SERVER START ================= */
