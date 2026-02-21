@@ -1,23 +1,18 @@
 {
   "name": "rtrp",
-  "version": "1.0.2",
+  "version": "1.0.0",
+  "description": "",
   "description": "Open Chat Application - Real-time Socket.IO chat",
   "main": "rtrpServer.js",
   "scripts": {
-    "start": "node rtrpServer.js",
-    "test": "echo \"No tests configured yet\" && exit 0",
-    "lint": "eslint rtrpServer.js uiLayer/realtime.js",
-    "format:check": "prettier --check \"**/*.{js,json}\" --ignore-path .prettierignore"
+    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node rtrpServer.js"
   },
-  "keywords": ["chat", "socket.io", "real-time"],
-  "author": "Harshith",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^5.2.1",
     "socket.io": "^4.8.3"
-  },
-  "devDependencies": {
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5"
   }
 }
