@@ -230,14 +230,14 @@ This project demonstrates proficiency in:
 
 ## 🚀 Future Enhancements
 
-- Message persistence with MongoDB
-- User authentication (OAuth/JWT)
-- File/image sharing capabilities
-- Message reactions and emojis
-- Private direct messaging
-- Room moderation tools
-- Message edit/delete functionality
-- Push notifications
+- **Private Direct Messaging**: One-to-one conversations using `socket.to(targetSocketId).emit()` — leverages existing Socket.IO infrastructure
+- **Message Reactions & Emojis**: Per-message emoji reactions stored in room state and broadcast on interaction
+- **File and Image Sharing**: Base64 encoding for small files over Socket.IO, or multipart HTTP upload for larger assets
+- **Room Moderation Tools**: Owner can kick users, set message rate limits, and transfer ownership
+- **Enhanced Room Discovery**: Search filters, sorting by activity, and room categories
+- **Horizontal Scalability**: Socket.IO Redis Adapter to synchronize events across multiple server instances behind a load balancer
+
+> **Design Philosophy**: This project intentionally avoids persistent databases and user authentication. The goal is ephemeral, privacy-first communication — rooms exist only while users are active, and all data disappears on disconnect. This aligns with use cases requiring temporary, secure conversations without digital footprints.
 
 ---
 
