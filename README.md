@@ -81,6 +81,15 @@ Open_Chat_Application/
 ├── rtrpServer.js              # Express + Socket.IO server
 ├── package.json               # Dependencies
 ├── package-lock.json
+│
+├── docs/                     # documents
+│   ├── project-report.docx
+│   └── abstract.pdf
+│
+├── presentations/            # PPTs
+│   ├── review-1.pptx
+│   └── review-2.pptx
+│
 ├── screenshots/               # UI screenshots
 │   ├── chat-room.png
 │   ├── create-room.png
