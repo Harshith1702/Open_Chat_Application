@@ -128,59 +128,53 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordGroup.style.display = isPrivate.checked ? 'block' : 'none';
   });
 
-// Create room
-confirmCreateRoom.addEventListener("click", () => {
-  const name = newRoomName.value.trim();
-  const max = parseInt(maxUsers.value);
-  const owner = prompt("Enter your username to create this room:");
+  // Create room
+  confirmCreateRoom.addEventListener("click", () => {
+    const owner = document.getElementById("createUsername").value.trim();
+    const name = newRoomName.value.trim();
+    const max = parseInt(maxUsers.value);
 
-  if (!owner || !owner.trim()) {
-    alert("Username is required!");
-    return;
-  }
+    if (!owner || owner.length < 2) {
+      alert("Username must be at least 2 characters!");
+      return;
+    }
 
-  if (!name || name.length < 2) {
-    alert("Room name must be at least 2 characters!");
-    return;
-  }
+    if (!name || name.length < 2) {
+      alert("Room name must be at least 2 characters!");
+      return;
+    }
 
-  if (max < 2 || max > 100) {
-    alert("Max users must be between 2 and 100!");
-    return;
-  }
+    if (max < 2 || max > 100) {
+      alert("Max users must be between 2 and 100!");
+      return;
+    }
 
-  const password = isPrivate.checked ? roomPassword.value : "";
+    const password = isPrivate.checked ? roomPassword.value : "";
 
-  if (isPrivate.checked && !password) {
-    alert("Password required for private rooms!");
-    return;
-  }
+    if (isPrivate.checked && !password) {
+      alert("Password required for private rooms!");
+      return;
+    }
 
-  // Store data for auto-join
-  const roomData = {
-    roomName: name,
-    password,
-    isPrivate: isPrivate.checked,
-    maxUsers: max,
-    owner: owner.trim()
-  };
+    currentUsername = owner;
 
-  currentUsername = owner.trim();
+    // Store password for auto-join BEFORE emitting
+    const pendingPassword = password;
 
-  socket.emit("create-room", roomData);
+    socket.emit("create-room", { roomName: name, password, isPrivate: isPrivate.checked, maxUsers: max, owner });
 
-  createRoomModal.classList.remove('active');
-  resetCreateForm();
+    createRoomModal.classList.remove('active');
+    resetCreateForm();
 
-  // Set flag to auto-join after room is created
-  socket.once("room-created", (createdRoom) => {
-    socket.emit("join-room", {
-      roomId: createdRoom.id,
-      username: currentUsername,
-      password: password
+    // Use a flag instead of stacking once() listeners
+    socket.once("room-created", (createdRoom) => {
+      socket.emit("join-room", {
+        roomId: createdRoom.id,
+        username: currentUsername,
+        password: pendingPassword
+      });
     });
   });
-});
 
   // Join room
   confirmJoinRoom.addEventListener("click", () => {
@@ -220,6 +214,10 @@ confirmCreateRoom.addEventListener("click", () => {
 
     socket.emit("chat-message", text);
     input.value = "";
+
+    // Clear typing timeout on send
+    clearTimeout(typingTimeout);
+    socket.emit("typing", false);
   }
 
   sendBtn.addEventListener("click", sendMessage);
@@ -258,25 +256,24 @@ confirmCreateRoom.addEventListener("click", () => {
   }
 
   // Leave room with confirmation
-leaveRoomBtn.addEventListener("click", () => {
-  const isOwner = currentRoom && currentRoom.owner === currentUsername;
-  const message = isOwner 
-    ? "Do you want to exit and delete this room?" 
-    : "Do you want to leave this room?";
-  
-  if (confirm(message)) {
-    leaveRoom();
-  }
-});
+  leaveRoomBtn.addEventListener("click", () => {
+    const isOwner = currentRoom && currentRoom.owner === currentUsername;
+    const message = isOwner 
+      ? "Do you want to exit and delete this room?" 
+      : "Do you want to leave this room?";
+    
+    if (confirm(message)) {
+      leaveRoom();
+    }
+  });
 
   function leaveRoom() {
-   socket.emit("leave-room");
-   const isOwner = currentRoom && currentRoom.owner === currentUsername;
-     lobbyView.style.display = "block";
-     chatView.style.display = "none";
-     currentRoom = null;
-     chat.innerHTML = "";
-}
+    socket.emit("leave-room");
+    lobbyView.style.display = "block";
+    chatView.style.display = "none";
+    currentRoom = null;
+    chat.innerHTML = "";
+  }
 
   // Info panel
   if (infoBtn) {
@@ -403,6 +400,7 @@ leaveRoomBtn.addEventListener("click", () => {
   }
 
   function resetCreateForm() {
+    document.getElementById("createUsername").value = "";
     newRoomName.value = "";
     maxUsers.value = "10";
     isPrivate.checked = false;
