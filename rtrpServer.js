@@ -44,14 +44,14 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (rooms.has(roomName.toLowerCase())) {
+    if (rooms.has(roomName.trim().toLowerCase())) {
       socket.emit("error", "Room name already exists");
       return;
     }
 
     const room = {
-      id: roomName.toLowerCase(),
-      name: roomName,
+      id: roomName.trim().toLowerCase(),
+      name: roomName.trim(),
       owner,
       password: password || "",
       isPrivate,
