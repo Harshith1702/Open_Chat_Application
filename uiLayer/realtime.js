@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Realtime JS loaded");
-
+  
   const socket = io();
 
   // Views
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let allRooms = [];
   let typingTimeout = null;
 
-  // ===== LOBBY FUNCTIONS =====
+  //---LOBBY FUNCTIONS 
 
   // Display rooms
   function displayRooms(rooms) {
@@ -148,21 +148,18 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Max users must be between 2 and 100!");
       return;
     }
-
+    
     const password = isPrivate.checked ? roomPassword.value : "";
-
+    
     if (isPrivate.checked && !password) {
       alert("Password required for private rooms!");
       return;
     }
-
     currentUsername = owner;
 
     // Store password for auto-join BEFORE emitting
     const pendingPassword = password;
-
     socket.emit("create-room", { roomName: name, password, isPrivate: isPrivate.checked, maxUsers: max, owner });
-
     createRoomModal.classList.remove('active');
     resetCreateForm();
 
@@ -187,9 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!selectedRoomForJoin) return;
-
     currentUsername = username;
-
     socket.emit("join-room", {
       roomId: selectedRoomForJoin.id,
       username,
@@ -205,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     displayRooms(allRooms);
   });
 
-  // ===== CHAT FUNCTIONS =====
+  //---CHAT FUNCTIONS 
 
   // Send message
   function sendMessage() {
@@ -221,7 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   sendBtn.addEventListener("click", sendMessage);
-  
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       sendMessage();
@@ -288,13 +282,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== SOCKET EVENTS =====
+  //---SOCKET EVENTS
 
   // Rooms list
   socket.on("rooms-list", (rooms) => {
     displayRooms(rooms);
   });
-
   // Joined room
   socket.on("joined-room", (room) => {
     currentRoom = room;
@@ -305,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRoomSubtitle(room);
     updateRoomInfo(room);
   });
-
   // Room updated (user count changed)
   socket.on("room-updated", (room) => {
   if (currentRoom && currentRoom.id === room.id) {
@@ -314,7 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRoomInfo(room);
   }
   });
-
   // Room message with timestamps
   socket.on("room-message", (msg) => {
     const div = document.createElement("div");
@@ -347,7 +338,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
   });
-
   // Typing users
   socket.on("typing-users", (users) => {
     const others = users.filter(u => u !== currentUsername);
@@ -360,7 +350,6 @@ document.addEventListener("DOMContentLoaded", () => {
       typingIndicator.textContent = `${others.length} people are typing...`;
     }
   });
-
   // Error
   socket.on("error", (msg) => {
     alert(msg);
@@ -372,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
      div.className = "system";
      div.textContent = "⚠️ Room was deleted by Owner.";
      chat.appendChild(div);
-
+      
      setTimeout(() => {
        lobbyView.style.display = "block";
        chatView.style.display = "none";
@@ -382,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
    }
  });
 
-  // ===== HELPER FUNCTIONS =====
+  //---HELPER FUNCTIONS
 
   function updateRoomSubtitle(room) {
     roomSubtitle.textContent = `👥 ${room.users.length} / ${room.maxUsers} users`;
