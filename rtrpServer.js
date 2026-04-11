@@ -1,19 +1,14 @@
-//let onlineUsers = 0; // users
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
-
 const app = express();
 const server = http.createServer(app);
-
 // Room management
 const rooms = new Map(); // Store all rooms
 const MAX_ROOMS = 101;
 
-/* ================= SOCKET.IO SETUP ================= */
-/* (CORS added for ngrok / multi-network access) */
+// SOCKET.IO SETUP 
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -21,7 +16,7 @@ const io = new Server(server, {
   }
 });
 
-/* ================= FRONTEND FILES ================= */
+// FRONTEND FILES 
 // Serve frontend files
 app.use(express.static(path.join(__dirname, "uiLayer")));
 
@@ -30,7 +25,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "uiLayer", "homeView.html"));
 });
 
-/* ================= SOCKET LOGIC ================= */
+//SOCKET LOGIC 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
@@ -103,26 +98,22 @@ io.on("connection", (socket) => {
 
     // Notify user
     socket.emit("joined-room", room);
-
+    
     // Notify room with timestamp
     io.to(roomId).emit("room-message", {
       type: "system",
       text: `${username} joined the room`,
       timestamp: new Date()
     });
-
     // Update room info for all users in the room
     io.to(roomId).emit("room-updated", room);
-
     // Update rooms list for everyone
     io.emit("rooms-list", Array.from(rooms.values()));
   });
-
   // Leave room
   socket.on("leave-room", () => {
     leaveRoom(socket);
   });
-
   // Send message
   socket.on("chat-message", (msg) => {
     if (!socket.currentRoom) return;
@@ -133,7 +124,6 @@ io.on("connection", (socket) => {
       text: msg,
       timestamp: new Date()
     });
-
     // Clear typing indicator
     const room = rooms.get(socket.currentRoom);
     if (room) {
@@ -145,7 +135,6 @@ io.on("connection", (socket) => {
   // Typing indicator
   socket.on("typing", (isTyping) => {
     if (!socket.currentRoom) return;
-
     const room = rooms.get(socket.currentRoom);
     if (!room) return;
 
@@ -157,7 +146,6 @@ io.on("connection", (socket) => {
 
     io.to(socket.currentRoom).emit("typing-users", room.typingUsers);
   });
-
   // Disconnect
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
@@ -175,20 +163,15 @@ function leaveRoom(socket) {
 
   const isOwner = room.owner === socket.username;
 
-  // ✅ If OWNER leaves → delete whole room immediately
+  // If OWNER leaves the room delete whole room immediately
   if (isOwner) {
-
     // Notify all users in that room
     socket.to(roomId).emit("room-deleted", roomId);
-
     // Force all sockets to leave instantly
     io.in(roomId).socketsLeave(roomId);
-
     // Delete the room from Map
     rooms.delete(roomId);
-
   } else {
-
     // Normal user leaving
     room.users = room.users.filter(u => u.id !== socket.id);
     room.typingUsers = room.typingUsers.filter(u => u !== socket.username);
@@ -209,7 +192,7 @@ function leaveRoom(socket) {
   io.emit("rooms-list", Array.from(rooms.values()));
 }
 
-/* ================= SERVER START ================= */
+//SERVER START
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`RTRP Server running on port ${PORT}`);
