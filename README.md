@@ -242,7 +242,7 @@ This project demonstrates proficiency in:
 
 ## Future Enhancements
 
-- **Private Direct Messaging**: One-to-one conversations using `socket.to(targetSocketId).emit()` — leverages existing Socket.IO infrastructure
+- **Private Direct Messaging**: One-to-one conversations using `socket.to(targetSocketId).emit()`. Leverages existing Socket.IO infrastructure
 - **Message Reactions & Emojis**: Per-message emoji reactions stored in room state and broadcast on interaction
 - **File and Image Sharing**: Base64 encoding for small files over Socket.IO, or multipart HTTP upload for larger assets
 - **Room Moderation Tools**: Owner can kick users, set message rate limits, and transfer ownership

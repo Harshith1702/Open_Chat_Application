@@ -45,25 +45,6 @@ body {
   margin-bottom: 20px;
 }
 
-.side-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: transparent;
-  border: none;
-  color: #aaa;
-  font-size: 18px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.side-btn:hover {
-  background: #1f1f1f;
-  color: #fff;
-}
-
 /* ===== APP ===== */
 .app {
   flex: 1;
@@ -136,7 +117,7 @@ body {
 }
 
 .my {
-  background: #1f3b4d;
+  background: #262626;
   margin-left: auto;
 }
 
@@ -201,8 +182,9 @@ body {
 
 /* SEND */
 #send-btn {
-  background: #00bcd4;
-  color: #000;
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #444;
 }
 
 /* ===== INFO PANEL ===== */
@@ -248,7 +230,7 @@ body {
 .lobby-view {
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  background: #0a0a0a;
   overflow-y: auto;
 }
 
@@ -266,7 +248,7 @@ body {
 .lobby-header h1 {
   font-size: 42px;
   margin-bottom: 10px;
-  color: #00bcd4;
+  color: #fff;
 }
 
 .lobby-subtitle {
@@ -282,9 +264,9 @@ body {
 }
 
 .btn-primary {
-  background: #00bcd4;
-  color: #000;
-  border: none;
+  background: #1a1a1a;
+  color: #eaeaea;
+  border: 1px solid #333;
   padding: 12px 24px;
   border-radius: 8px;
   font-size: 15px;
@@ -294,7 +276,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: #00acc1;
+  background: #2a2a2a;
   transform: translateY(-2px);
 }
 
@@ -338,9 +320,8 @@ body {
 }
 
 .room-card:hover {
-  border-color: #00bcd4;
+  border-color: #666;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.2);
 }
 
 .room-card-header {
@@ -390,7 +371,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #00bcd4;
+  outline: 2px solid #eaeaea;
   outline-offset: 2px;
 }
 
@@ -610,14 +591,12 @@ body {
   .header-actions button {
     width: 42px;
     height: 42px;
-    font-size: 18px;
     flex-shrink: 0;
   }
 
   #send-btn {
     width: 44px;
     height: 44px;
-    font-size: 20px;
   }
 
   .info-panel {
