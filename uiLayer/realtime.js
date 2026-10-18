@@ -54,6 +54,25 @@ document.addEventListener("DOMContentLoaded", () => {
   let allRooms = [];
   let typingTimeout = null;
 
+  // Theme
+  const themeToggles = document.querySelectorAll(".js-theme-toggle");
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+    const label = theme === "light" ? "Switch to dark mode" : "Switch to light mode";
+    themeToggles.forEach((btn) => btn.setAttribute("aria-label", label));
+  }
+
+  setTheme(document.documentElement.getAttribute("data-theme") || "dark");
+
+  themeToggles.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      setTheme(current === "light" ? "dark" : "light");
+    });
+  });
+
   //---LOBBY FUNCTIONS 
 
   function displayRooms(rooms) {

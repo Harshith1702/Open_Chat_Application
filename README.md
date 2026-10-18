@@ -51,7 +51,7 @@ A real-time chat application with room-based architecture, built with **Node.js*
 - Instant join/leave notifications
 
 ### UI
-- Dark theme
+- Dark and light themes: follows your system setting by default, toggle to switch, choice saved in your browser
 - Fully responsive design (mobile, tablet, desktop)
 - Smooth animations for room transitions and messages
 - Clear visual hierarchy
