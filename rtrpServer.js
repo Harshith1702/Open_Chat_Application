@@ -8,10 +8,18 @@ const server = http.createServer(app);
 const rooms = new Map(); // Store all rooms
 const MAX_ROOMS = 101;
 
-// SOCKET.IO SETUP 
+// SOCKET.IO SETUP
+// Same-origin clients (the UI served by this server) never hit CORS.
+// Cross-origin clients are only allowed from origins listed in ALLOWED_ORIGINS,
+// e.g. ALLOWED_ORIGINS=https://myapp.onrender.com,http://localhost:3000
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:4000")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ALLOWED_ORIGINS,
     methods: ["GET", "POST"]
   }
 });
@@ -32,7 +40,6 @@ io.on("connection", (socket) => {
   // Send current rooms list
   socket.emit("rooms-list", Array.from(rooms.values()));
 
-  // Create room
   socket.on("create-room", ({ roomName, password, isPrivate, maxUsers, owner }) => {
     if (rooms.size >= MAX_ROOMS) {
       socket.emit("error", "Maximum 101 rooms reached");

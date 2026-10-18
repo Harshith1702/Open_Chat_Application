@@ -56,41 +56,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //---LOBBY FUNCTIONS 
 
-  // Display rooms
   function displayRooms(rooms) {
     allRooms = rooms;
     const filtered = searchRooms.value 
       ? rooms.filter(r => r.name.toLowerCase().includes(searchRooms.value.toLowerCase()))
       : rooms;
 
+    roomsList.replaceChildren();
+
     if (filtered.length === 0) {
-      roomsList.innerHTML = '<p style="text-align:center;color:#666;padding:40px;">No rooms available. Create one!</p>';
+      const empty = document.createElement("p");
+      empty.className = "rooms-empty";
+      empty.textContent = "No rooms available. Create one!";
+      roomsList.appendChild(empty);
       return;
     }
 
-    roomsList.innerHTML = filtered.map(room => {
+    filtered.forEach(room => {
       const isFull = room.users.length >= room.maxUsers;
-      return `
-        <div class="room-card ${isFull ? 'room-full' : ''}" data-room-id="${room.id}" ${!isFull ? 'onclick="handleRoomClick(\'' + room.id + '\')"' : ''}>
-          <div class="room-card-header">
-            <div>
-              <div class="room-name">${escapeHtml(room.name)}</div>
-              <div class="room-owner">Owner: ${escapeHtml(room.owner)}</div>
-            </div>
-            <div class="room-privacy">${room.isPrivate ? '🔒' : '🔓'}</div>
-          </div>
-          <div class="room-stats">
-            <div class="room-stat">👥 ${room.users.length} / ${room.maxUsers}</div>
-            <div class="room-stat">${room.isPrivate ? 'Private' : 'Public'}</div>
-            ${isFull ? '<div class="room-stat" style="color:#f44336;">FULL</div>' : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+      const card = document.createElement("div");
+      card.className = "room-card" + (isFull ? " room-full" : "");
+      card.dataset.roomId = room.id;
+
+      if (!isFull) {
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", "Join room " + room.name);
+        card.addEventListener("click", () => handleRoomClick(room.id));
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleRoomClick(room.id);
+          }
+        });
+      }
+
+      const header = document.createElement("div");
+      header.className = "room-card-header";
+
+      const titleWrap = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "room-name";
+      name.textContent = room.name;
+      const owner = document.createElement("div");
+      owner.className = "room-owner";
+      owner.textContent = "Owner: " + room.owner;
+      titleWrap.append(name, owner);
+
+      const privacy = document.createElement("div");
+      privacy.className = "room-privacy";
+      privacy.textContent = room.isPrivate ? "Private" : "Public";
+
+      header.append(titleWrap, privacy);
+
+      const stats = document.createElement("div");
+      stats.className = "room-stats";
+
+      const count = document.createElement("div");
+      count.className = "room-stat";
+      count.textContent = room.users.length + " / " + room.maxUsers + " users";
+
+      const type = document.createElement("div");
+      type.className = "room-stat";
+      type.textContent = room.isPrivate ? "Password protected" : "Open to anyone";
+
+      stats.append(count, type);
+
+      if (isFull) {
+        const full = document.createElement("div");
+        full.className = "room-stat room-full-label";
+        full.textContent = "FULL";
+        stats.appendChild(full);
+      }
+
+      card.append(header, stats);
+      roomsList.appendChild(card);
+    });
   }
 
-  // Handle room click
-  window.handleRoomClick = function(roomId) {
+  function handleRoomClick(roomId) {
     const room = allRooms.find(r => r.id === roomId);
     if (!room) return;
 
@@ -128,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordGroup.style.display = isPrivate.checked ? 'block' : 'none';
   });
 
-  // Create room
   confirmCreateRoom.addEventListener("click", () => {
     const owner = document.getElementById("createUsername").value.trim();
     const name = newRoomName.value.trim();
@@ -244,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (clearChatBtn) {
     clearChatBtn.addEventListener("click", () => {
       if (confirm("Clear all messages in this chat?")) {
-        chat.innerHTML = "";
+        chat.replaceChildren();
       }
     });
   }
@@ -266,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lobbyView.style.display = "block";
     chatView.style.display = "none";
     currentRoom = null;
-    chat.innerHTML = "";
+    chat.replaceChildren();
   }
 
   // Info panel
@@ -326,13 +369,19 @@ document.addEventListener("DOMContentLoaded", () => {
         minute: '2-digit' 
       });
 
-      div.innerHTML = `
-        <div style="font-size:12px;opacity:0.7;margin-bottom:4px;">
-          ${isMine ? "You" : escapeHtml(msg.username)}
-          <span style="margin-left:8px;font-size:10px;opacity:0.6;">${time}</span>
-        </div>
-        <div>${escapeHtml(msg.text)}</div>
-      `;
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+      const who = document.createElement("span");
+      who.textContent = isMine ? "You" : msg.username;
+      const timeEl = document.createElement("span");
+      timeEl.className = "message-time";
+      timeEl.textContent = time;
+      meta.append(who, timeEl);
+
+      const body = document.createElement("div");
+      body.textContent = msg.text;
+
+      div.append(meta, body);
     }
 
     chat.appendChild(div);
@@ -359,14 +408,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if(currentRoom && currentRoom.id === roomId) {
      const div = document.createElement("div");
      div.className = "system";
-     div.textContent = "⚠️ Room was deleted by Owner.";
+     div.textContent = "Room was deleted by the owner.";
      chat.appendChild(div);
       
      setTimeout(() => {
        lobbyView.style.display = "block";
        chatView.style.display = "none";
        currentRoom = null;
-       chat.innerHTML = "";
+       chat.replaceChildren();
      }, 2000);
    }
  });
@@ -374,18 +423,35 @@ document.addEventListener("DOMContentLoaded", () => {
   //---HELPER FUNCTIONS
 
   function updateRoomSubtitle(room) {
-    roomSubtitle.textContent = `👥 ${room.users.length} / ${room.maxUsers} users`;
+    roomSubtitle.textContent = `${room.users.length} / ${room.maxUsers} users`;
   }
 
   function updateRoomInfo(room) {
-    roomInfo.innerHTML = `
-      <p><strong>Room:</strong> ${escapeHtml(room.name)}</p>
-      <p><strong>Owner:</strong> 👑 ${escapeHtml(room.owner)}</p>
-      <p><strong>Users:</strong> ${room.users.length} / ${room.maxUsers}</p>
-      <p><strong>Type:</strong> ${room.isPrivate ? '🔒 Private' : '🔓 Public'}</p>
-      <hr style="margin:16px 0;border-color:#333;">
-      <p style="font-size:12px;color:#999;">Real-time Socket.IO chat</p>
-    `;
+    roomInfo.replaceChildren();
+
+    const rows = [
+      ["Room:", room.name],
+      ["Owner:", room.owner],
+      ["Users:", `${room.users.length} / ${room.maxUsers}`],
+      ["Type:", room.isPrivate ? "Private" : "Public"]
+    ];
+
+    rows.forEach(([label, value]) => {
+      const p = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = label + " ";
+      p.append(strong, document.createTextNode(value));
+      roomInfo.appendChild(p);
+    });
+
+    const hr = document.createElement("hr");
+    hr.className = "info-separator";
+
+    const foot = document.createElement("p");
+    foot.className = "room-info-foot";
+    foot.textContent = "Real-time Socket.IO chat";
+
+    roomInfo.append(hr, foot);
   }
 
   function resetCreateForm() {
@@ -402,12 +468,6 @@ document.addEventListener("DOMContentLoaded", () => {
     joinPassword.value = "";
     joinPasswordGroup.style.display = "none";
     selectedRoomForJoin = null;
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 
   console.log("Realtime chat initialized");

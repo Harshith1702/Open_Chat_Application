@@ -1,32 +1,32 @@
-# Open Chat - Real-Time Room-Based Chat Application 🚀
+# Open Chat - Real-Time Room-Based Chat Application
 
-A feature-rich, real-time chat application with room-based architecture, built using **Node.js**, **Express**, and **Socket.IO**. Experience seamless communication with public/private rooms, typing indicators, and a stunning dark-themed UI optimized for all devices.
-
----
-
-## 📋 Table of Contents
-- [Features](#-features)
-- [Tech Stack](#️-tech-stack)
-- [Project Structure](#-project-structure)
-- [System Architecture](#-system-architecture)
-- [How to Run Locally](#️-how-to-run-locally)
-- [Live Demo](#-live-demo)
-- [Screenshots](#-screenshots)
-- [Learning Outcomes](#-learning-outcomes)
-- [Security Considerations](#-security-considerations)
-- [Future Enhancements](#-future-enhancements)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Support](#-support)
+A real-time chat application with room-based architecture, built with **Node.js**, **Express**, and **Socket.IO**. It supports public and private rooms, typing indicators, and a dark-themed UI that works on mobile, tablet, and desktop.
 
 ---
 
-## 🔹 Features
+## Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [System Architecture](#system-architecture)
+- [How to Run Locally](#how-to-run-locally)
+- [Live Demo](#live-demo)
+- [Screenshots](#screenshots)
+- [Learning Outcomes](#learning-outcomes)
+- [Security Considerations](#security-considerations)
+- [Future Enhancements](#future-enhancements)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+
+---
+
+## Features
 
 ### Room-Based Chat System
 - Create custom chat rooms with unique names
 - Browse all available rooms before joining
-- Seamless room switching without page reloads
+- Switch rooms without reloading the page
 - Rooms are temporary and exist only while users are active (no database required)
 - Rooms are automatically deleted when the last user leaves or when the room creator exits
 
@@ -40,7 +40,7 @@ A feature-rich, real-time chat application with room-based architecture, built u
 - Owner name displayed in room listings
 - Set maximum user limits per room (2-100 users)
 - Visual occupancy indicators (e.g., `3 / 10`)
-- System-wide limit of 101 users per room to prevent overload
+- System-wide limit of 101 rooms to prevent overload
 
 ### User Experience
 - Unique usernames required within each room
@@ -50,15 +50,15 @@ A feature-rich, real-time chat application with room-based architecture, built u
 - Available slots visualization
 - Instant join/leave notifications
 
-### Modern UI/UX
-- Dark theme with glassmorphism effects
+### UI
+- Dark theme
 - Fully responsive design (mobile, tablet, desktop)
 - Smooth animations for room transitions and messages
-- Intuitive navigation with clear visual hierarchy
+- Clear visual hierarchy
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -69,7 +69,7 @@ A feature-rich, real-time chat application with room-based architecture, built u
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 ```
 Open_Chat_Application/
 │
@@ -82,11 +82,11 @@ Open_Chat_Application/
 ├── package.json               # Dependencies
 ├── package-lock.json
 │
-├── docs/                     # documents
-│   ├── project-report.docx
+├── docs/                      # Documents
+│   ├── report.docx
 │   └── abstract.pdf
 │
-├── presentations/            # PPTs
+├── presentations/             # PPTs
 │   ├── review-1.pptx
 │   └── review-2.pptx
 │
@@ -103,7 +103,7 @@ Open_Chat_Application/
 
 ---
 
-## 🧠 System Architecture
+## System Architecture
 ```
 ┌─────────────┐          HTTP/WebSocket          ┌─────────────┐
 │   Browser   │ ◄──────────────────────────────► │   Node.js   │
@@ -131,7 +131,7 @@ Open_Chat_Application/
 
 ---
 
-## ▶️ How to Run Locally
+## How to Run Locally
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -141,47 +141,49 @@ Open_Chat_Application/
 
 1. **Clone the repository:**
 ```bash
-   git clone https://github.com/Harshith1702/Open_Chat_Application.git
+git clone https://github.com/Harshith1702/Open_Chat_Application.git
 ```
 
 2. **Navigate to project directory:**
 ```bash
-   cd Open_Chat_Application
+cd Open_Chat_Application
 ```
 
 3. **Install dependencies:**
 ```bash
-   npm install
+npm install
 ```
 
 4. **Start the server:**
 ```bash
-   npm start
+npm start
 ```
 
 5. **Open in browser:**
 ```
-   http://localhost:4000
+http://localhost:4000
 ```
+
+By default the server only accepts Socket.IO connections from `http://localhost:4000`. If you host the UI on another origin, set the `ALLOWED_ORIGINS` environment variable to a comma-separated list of allowed origins, e.g. `ALLOWED_ORIGINS=https://myapp.onrender.com`.
 
 ---
 
-## 🌐 Live Demo
+## Live Demo
 
-🔗 **[Try Open Chat Live](https://open-chat-application-ubti.onrender.com)**
+**[Try Open Chat Live](https://open-chat-application-ubti.onrender.com)**
 
 > **Note:** Hosted on Render's free tier. Initial load may take 30-60 seconds if the service is idle.
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
-### 🖥️ Desktop View
+### Desktop View
 ![Desktop Chat Interface](screenshots/desktop-view.png)
 
-*Spacious layout with room list sidebar and chat area*
+*Layout with room list and chat area*
 <br><br>
-### 📱 Mobile View
+### Mobile View
 
 <p align="center">
   <img src="screenshots/mobile-view.png" width="300">
@@ -189,29 +191,29 @@ Open_Chat_Application/
 
 *Optimized for touch interactions and smaller screens*
 <br><br>
-### 🏠 Create Room Interface
+### Create Room Interface
 ![Create Room Modal](screenshots/create-room.png)
 
-*Intuitive room creation with all options visible*
+*Room creation with all options visible*
 <br><br>
-### 💬 Active Chat Room
+### Active Chat Room
 ![Chat Room in Action](screenshots/chat-room.png)
 
 *Real-time messaging with typing indicators and user list*
 <br><br>
-### 🔌 WebSocket Connection
+### WebSocket Connection
 ![WebSocket 101 Protocol](screenshots/websocket-101.png)
 
 *Browser DevTools showing an active WebSocket (HTTP 101 upgrade) connection via Socket.IO*
 <br><br>
-### ☁️ Cloud Deployment
+### Cloud Deployment
 ![Render Deployment Dashboard](screenshots/render-deploy.png)
 
 *Live deployment on Render platform*
 
 ---
 
-## 🎯 Learning Outcomes
+## Learning Outcomes
 
 This project demonstrates proficiency in:
 
@@ -226,18 +228,19 @@ This project demonstrates proficiency in:
 
 ---
 
-## 🔐 Security Considerations
+## Security Considerations
 
 - Server-side room password validation
 - Basic input validation to prevent malformed data
 - Controlled room limits to avoid server overload
 - No persistent storage (reduces attack surface)
+- Socket.IO CORS restricted to origins listed in `ALLOWED_ORIGINS`
 
 > Note: This project focuses on real-time systems learning, not production-grade security.
 
 ---
 
-## 🚀 Future Enhancements
+## Future Enhancements
 
 - **Private Direct Messaging**: One-to-one conversations using `socket.to(targetSocketId).emit()` — leverages existing Socket.IO infrastructure
 - **Message Reactions & Emojis**: Per-message emoji reactions stored in room state and broadcast on interaction
@@ -246,11 +249,11 @@ This project demonstrates proficiency in:
 - **Enhanced Room Discovery**: Search filters, sorting by activity, and room categories
 - **Horizontal Scalability**: Socket.IO Redis Adapter to synchronize events across multiple server instances behind a load balancer
 
-> **Design Philosophy**: This project intentionally avoids persistent databases and user authentication. The goal is ephemeral, privacy-first communication — rooms exist only while users are active, and all data disappears on disconnect. This aligns with use cases requiring temporary, secure conversations without digital footprints.
+> **Design note**: This project intentionally avoids persistent databases and user authentication. Rooms exist only while users are active, and all data disappears on disconnect.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -262,9 +265,9 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📚 Academic Note
+## Academic Note
 
-This project is shared publicly for **educational and demonstration purposes**. 
+This project is shared publicly for **educational and demonstration purposes**.
 
 **Academic Integrity Guidelines:**
 - Cloning for learning and reference is encouraged
@@ -274,21 +277,21 @@ This project is shared publicly for **educational and demonstration purposes**.
 
 ---
 
-## 👤 Author
+## Author
 
 **Padakanti Harshith**  
 B.Tech Computer Science and Engineering  
-🔗 GitHub: [@Harshith1702](https://github.com/Harshith1702)
+GitHub: [@Harshith1702](https://github.com/Harshith1702)
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Socket.IO documentation and community
 - Render for free hosting services
@@ -296,12 +299,12 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ---
 
-## 📞 Support
+## Support
 
-Found a bug? Have suggestions?  
-- 🐛 [Report Issues](https://github.com/Harshith1702/Open_Chat_Application/issues)
-- 💡 [Feature Requests](https://github.com/Harshith1702/Open_Chat_Application/issues/new)
-- ⭐ Star this repo if you found it helpful!
+Found a bug? Have suggestions?
+- [Report Issues](https://github.com/Harshith1702/Open_Chat_Application/issues)
+- [Feature Requests](https://github.com/Harshith1702/Open_Chat_Application/issues/new)
+- Star this repo if you found it helpful!
 
 ---
 
